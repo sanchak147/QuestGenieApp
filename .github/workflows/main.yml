@@ -21,4 +21,4 @@ jobs:
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
-        git push https://sanchak147:$OPENAI_API_KEY@huggingface.co/spaces/sanchak147/QuestGenieApp main
+        git push --force https://sanchak147:$OPENAI_API_KEY@huggingface.co/spaces/sanchak147/QuestGenieApp main
