@@ -1,0 +1,9 @@
+langchain
+langchain_community
+pandas
+numpy
+streamlit
+python-dotenv
+openai
+OPENAI
+google-generativeai
