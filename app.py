@@ -48,10 +48,18 @@ st.markdown("""
     background-color: #ff4d4d;
     color:black;
     }
-    .stTextArea > textarea {
+    .stTextArea > label > div {
+        display: flex;
+        align-items: center;
+    }
+    .stTextArea > div > textarea {
         border-radius: 5px;
         border: 1px solid #ddd;
         padding: 10px;
+        resize: vertical;  /* Allow the textarea to grow vertically */
+        min-height: 100px;  /* Minimum height for the textarea */
+        max-height: 400px;  /* Maximum height for the textarea */
+        overflow: auto;  /* Allow scrolling if content exceeds max height */
     }
     </style>
     """, unsafe_allow_html=True)
