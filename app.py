@@ -2,9 +2,12 @@ import streamlit as st
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
+openai_api_key= os.getenv('OPENAI_API_KEY')
 # Initialize your language model
-llm = OpenAI()
+llm = OpenAI(openai_api_key=openai_api_key)
 
 # Define a function to generate questions
 def generate_question(topic, difficulty):
