@@ -1,19 +1,24 @@
-name: Sync to Hugging Face hub
+name: Sync to Hugging Face Hub
+
 on:
   push:
     branches: [main]
 
-  #to run this workflow manually from the Actions tab
+  # To run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
+
     steps:
-      -uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      -name: Push to hub
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Push to Hugging Face Hub
       env:
-        OPENAI_API_KEY: ${{secrets.OPENAI_API_KEY }}
-      run: git push https://sanchak147:$OPENAI_API_KEY@huggingface.co/spaces/sanchak147/QuestGenieApp main
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        git push https://sanchak147:$OPENAI_API_KEY@huggingface.co/spaces/sanchak147/QuestGenieApp main
