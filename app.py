@@ -19,7 +19,7 @@ def generate_question(topic, difficulty):
 
 # Define a function to provide feedback
 def get_feedback(answer, question):
-    prompt_template = f"Provide precise and professional feedback on the following answer: '{answer}' to the question: '{question}'. Highlight areas for improvement in 50 words."
+    prompt_template = f"Provide precise and professional feedback on the following answer: '{answer}' to the question: '{question}'. Highlight areas for improvement in 50 words,if scope provide the correct code."
     prompt = PromptTemplate(template=prompt_template)
     chain = LLMChain(llm=llm, prompt=prompt)
     feedback = chain.run(prompt_text=prompt_template)
