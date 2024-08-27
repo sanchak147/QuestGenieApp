@@ -67,6 +67,13 @@ st.markdown("""
 # Title and description
 st.title("QuestGenie 🧞")
 st.markdown('''Your Q&A Feedback Buddy: Enter a topic 📖, choose difficulty🤔, get questions, and receive personalized feedback💡''')
+# Footer with app version and copyright
+st.markdown(f"""
+    <div class="footer-text">
+        <p>QuestGenie Version 1.0.3 | &copy; 2024 sanchak147</p>
+    </div>
+""", unsafe_allow_html=True)
+
 
 # Text input for topic
 topic = st.text_input("Enter the subject topic:")
@@ -98,9 +105,3 @@ if 'question' in st.session_state:
             st.write("Feedback:", feedback)
         else:
             st.error("Please enter your answer.")
-# Footer with app version and copyright
-st.markdown(f"""
-    <div class="footer-text">
-        <p>QuestGenie Version 1.0.3 | &copy; 2024 sanchak147</p>
-    </div>
-""", unsafe_allow_html=True)
