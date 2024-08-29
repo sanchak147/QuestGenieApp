@@ -170,6 +170,6 @@ if 'question' in st.session_state:
 # Footer with app version and copyright
 st.markdown(f"""
     <div class="footer-text">
-        <p style="text-align: center;">QuestGenie Version 1.0.4 | &copy; 2024 sanchak147</p>
+        <p style="text-align: center;">QuestGenie Version 1.1.0 | &copy; 2024 sanchak147</p>
     </div>
 """, unsafe_allow_html=True)
