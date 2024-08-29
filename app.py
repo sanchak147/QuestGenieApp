@@ -19,7 +19,15 @@ def generate_question(topic, difficulty):
 
 # Define a function to provide feedback
 def get_feedback(answer, question):
-    prompt_template = f"Provide precise and professional feedback on the following answer: '{answer}' to the question: '{question}'.If the answer is wrong, tell it directly. Highlight areas for improvement in 50 words,if there is scope provide the correct code."
+    # Normalize the answer by removing extra spaces and converting to lowercase
+    normalized_answer = answer.strip().lower()
+
+    # Check if the answer is "don't know", "-", "no", or other similar non-informative responses
+    if normalized_answer in ["don't know", "no", "-", "n/a", "none", "idk","i don't know","i do not know"]:
+        prompt_template = f"User doesn't know the answer to the question: '{question}'. Respond with encouragement, explain that it's okay not to know, and provide the correct answer along with some tips on how to learn this topic."
+    else:
+        prompt_template = f"Provide precise and professional feedback on the following answer: '{answer}' to the question: '{question}'. If the answer is wrong, tell it directly. Highlight areas for improvement in 50 words, if there is scope provide the correct code."
+    
     prompt = PromptTemplate(template=prompt_template)
     chain = LLMChain(llm=llm, prompt=prompt)
     feedback = chain.run(prompt_text=prompt_template)
