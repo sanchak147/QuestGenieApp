@@ -78,7 +78,7 @@ st.markdown('''Your Q&A Feedback Buddy: Enter a topic ðŸ“–, choose difficultyðŸ¤
 # Footer with app version and copyright
 st.markdown(f"""
     <div class="footer-text">
-        <p>QuestGenie Version 1.0.3 | &copy; 2024 sanchak147</p>
+        <p>QuestGenie Version 1.0.4 | &copy; 2024 sanchak147</p>
     </div>
 """, unsafe_allow_html=True)
 
