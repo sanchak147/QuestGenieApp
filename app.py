@@ -4,8 +4,10 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
-openai_api_key= os.getenv('OPENAI_API_KEY')
+openai_api_key = os.getenv('OPENAI_API_KEY')
+
 # Initialize your language model
 llm = OpenAI(openai_api_key=openai_api_key)
 
@@ -17,13 +19,18 @@ def generate_question(topic, difficulty):
     question = chain.run(prompt_text=prompt_template)
     return question
 
+# Define a function to generate a hint
+def generate_hint(question):
+    prompt_template = f"Provide a hint for the following question: '{question}'. Make the hint informative but not give away the entire answer."
+    prompt = PromptTemplate(template=prompt_template)
+    chain = LLMChain(llm=llm, prompt=prompt)
+    hint = chain.run(prompt_text=prompt_template)
+    return hint
+
 # Define a function to provide feedback
 def get_feedback(answer, question):
-    # Normalize the answer by removing extra spaces and converting to lowercase
     normalized_answer = answer.strip().lower()
-
-    # Check if the answer is "don't know", "-", "no", or other similar non-informative responses
-    if normalized_answer in ["don't know", "no", "-", "n/a", "none", "idk","i don't know","i do not know"]:
+    if normalized_answer in ["don't know", "no", "-", "n/a", "none", "idk"]:
         prompt_template = f"User doesn't know the answer to the question: '{question}'. Respond with encouragement, explain that it's okay not to know, and provide the correct answer along with some tips on how to learn this topic."
     else:
         prompt_template = f"Provide precise and professional feedback on the following answer: '{answer}' to the question: '{question}'. If the answer is wrong, tell it directly. Highlight areas for improvement in 50 words, if there is scope provide the correct code."
@@ -32,7 +39,11 @@ def get_feedback(answer, question):
     chain = LLMChain(llm=llm, prompt=prompt)
     feedback = chain.run(prompt_text=prompt_template)
     return feedback
-st.set_page_config(page_title="Question and Answer Feedback")
+
+# Streamlit UI Setup
+st.set_page_config(page_title="QuestGenie 🧞")
+st.title("QuestGenie 🧞")
+st.markdown('''Your Q&A Feedback Buddy: Enter a topic 📖, choose difficulty🤔, get questions, and receive personalized feedback💡''')
 
 # Custom CSS for better styling
 st.markdown("""
@@ -52,9 +63,9 @@ st.markdown("""
         font-size: 16px;
         transition: background-color 0.3s ease, color 0.3s ease;
     }
-    .stButton> button:hover{
-    background-color: #ff4d4d;
-    color:black;
+    .stButton > button:hover {
+        background-color: #ff4d4d;
+        color: black;
     }
     .stTextArea > label > div {
         display: flex;
@@ -72,33 +83,75 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Title and description
-st.title("QuestGenie 🧞")
-st.markdown('''Your Q&A Feedback Buddy: Enter a topic 📖, choose difficulty🤔, get questions, and receive personalized feedback💡''')
-# Footer with app version and copyright
-st.markdown(f"""
-    <div class="footer-text">
-        <p>QuestGenie Version 1.0.4 | &copy; 2024 sanchak147</p>
-    </div>
-""", unsafe_allow_html=True)
+# Sidebar Styling with HTML and CSS
+st.sidebar.markdown("""
+    <style>
+    .sidebar .sidebar-content {
+        background-color: #2C3E50;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .sidebar .sidebar-content .stButton > button {
+        background-color: #3498DB;
+        color: white;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 16px;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+    .sidebar .sidebar-content .stButton > button:hover {
+        background-color: #2980B9;
+    }
+    .sidebar .sidebar-content .stTextInput > div > input,
+    .sidebar .sidebar-content .stSelectbox > div {
+        border-radius: 5px;
+        border: 1px solid #3498DB;
+        padding: 10px;
+    }
+    .sidebar .sidebar-content .centered-button {
+        display: flex;
+        justify-content: center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
+# Sidebar for hint button
+with st.sidebar:
+    st.markdown('<h2 style="color: white;">Options</h2>', unsafe_allow_html=True)
+    if st.button("💡 Show Hint"):
+        if 'question' not in st.session_state:
+            st.warning("Please generate a question first before requesting a hint.")
+        else:
+            hint = generate_hint(st.session_state.question)
+            st.session_state.hint = hint
 
 # Text input for topic
 topic = st.text_input("Enter the subject topic:")
 
 # Dropdown for difficulty
-difficulty = st.selectbox("Select the difficulty level:", ["Easy", "Medium", "Hard",'Very Hard','Expert'])
+difficulty = st.selectbox("Select the difficulty level:", ["Easy", "Medium", "Hard", "Very Hard", "Expert"])
 
 # Button to generate question
 if st.button("Generate Question"):
     if topic:
         question = generate_question(topic, difficulty)
         st.session_state.question = question
+        st.session_state.hint = None  # Reset hint when a new question is generated
         st.session_state.answer = None
         st.session_state.feedback = None
-        st.write("Generated Question:", question)
     else:
         st.error("Please enter a subject topic.")
+
+# Ensure the question persists after button clicks
+if 'question' in st.session_state:
+    st.write("Generated Question:", st.session_state.question)
+
+    # Display the hint in a collapsible section
+    if 'hint' in st.session_state and st.session_state.hint:
+        with st.expander("Hint"):
+            st.write(st.session_state.hint)
 
 # Text area for answer
 if 'question' in st.session_state:
@@ -113,3 +166,10 @@ if 'question' in st.session_state:
             st.write("Feedback:", feedback)
         else:
             st.error("Please enter your answer.")
+
+# Footer with app version and copyright
+st.markdown(f"""
+    <div class="footer-text">
+        <p style="text-align: center;">QuestGenie Version 1.0.4 | &copy; 2024 sanchak147</p>
+    </div>
+""", unsafe_allow_html=True)
