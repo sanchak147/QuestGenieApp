@@ -5,20 +5,33 @@ from langchain.chains import LLMChain
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
 # Initialize your language model
 llm = OpenAI(openai_api_key=openai_api_key)
 
+# Initialize session state for progress tracking
+if 'questions_attempted' not in st.session_state:
+    st.session_state.questions_attempted = 0
+if 'correct_answers' not in st.session_state:
+    st.session_state.correct_answers = 0
+
 # Define a function to generate questions
-def generate_question(topic, difficulty):
-    prompt_template = f"Generate a {difficulty} level technical question (coding question if possible) on the topic of {topic}."
+def generate_question(topic, difficulty, question_type=None):
+    if question_type:
+        prompt_template = f"Generate a {difficulty} level {question_type} question on the topic of {topic}."
+    else:
+        prompt_template = f"Generate a {difficulty} level technical question (coding question if possible) on the topic of {topic}."
+    
     prompt = PromptTemplate(template=prompt_template)
     chain = LLMChain(llm=llm, prompt=prompt)
     question = chain.run(prompt_text=prompt_template)
     return question
 
+
+# Define a function to generate a hint
 # Define a function to generate a hint
 def generate_hint(question):
     prompt_template = f"Provide a hint for the following question: '{question}'. Make the hint informative but not give away the entire answer."
@@ -38,6 +51,12 @@ def get_feedback(answer, question):
     prompt = PromptTemplate(template=prompt_template)
     chain = LLMChain(llm=llm, prompt=prompt)
     feedback = chain.run(prompt_text=prompt_template)
+    
+    # Update progress tracking
+    st.session_state.questions_attempted += 1
+    if "correct" in feedback.lower():
+        st.session_state.correct_answers += 1
+    
     return feedback
 
 def generate_code(question):
@@ -135,8 +154,9 @@ with st.sidebar:
         if 'question' not in st.session_state:
             st.warning("Please generate a question first before requesting a hint.")
         else:
+            step = st.number_input("Select Step for Hint:", min_value=1, step=1)
             with st.spinner('Generating Hint....'):
-                hint = generate_hint(st.session_state.question)
+                hint = generate_hint(st.session_state.question, step)
                 st.session_state.hint = hint
                 st.success('Hint Generated !')
     
@@ -154,6 +174,19 @@ with st.sidebar:
 # Text input for topic
 topic = st.text_input("Enter the subject topic:")
 
+topics_with_types = {
+    "Python": ["Syntax", "Real-World Problems using Codex", "Core"],
+    "Machine Learning": ["Theory", "Coding", "Real-World Applications using Code"],
+    "Statistics": ['Theory','Coding in Python','Real-World Problems Using Code']
+    # Add more topics and types as needed
+}
+
+# Check if the topic has specific question types
+if topic in topics_with_types:
+    question_type = st.selectbox("Select the type of question:", topics_with_types[topic])
+else:
+    question_type = None
+
 # Dropdown for difficulty
 difficulty = st.selectbox("Select the difficulty level:", ["Easy", "Medium", "Hard", "Very Hard", "Expert"])
 
@@ -165,7 +198,7 @@ if st.button("Generate Question"):
         st.session_state.hint = None  # Reset hint when a new question is generated
         st.session_state.answer = None
         st.session_state.feedback = None
-        st.session_state.optimal_code= None
+        st.session_state.optimal_code = None
 
     else:
         st.error("Please enter a subject topic.")
@@ -195,6 +228,12 @@ if 'question' in st.session_state:
             st.write("Feedback:", feedback)
         else:
             st.error("Please enter your answer.")
+
+# Display progress to the user
+if st.session_state.questions_attempted > 0:
+    progress = st.session_state.correct_answers / st.session_state.questions_attempted
+    st.write(f"Progress: {st.session_state.correct_answers}/{st.session_state.questions_attempted} correct answers")
+    st.progress(progress)
 
 # Footer with app version and copyright
 st.markdown(f"""
