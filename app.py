@@ -40,6 +40,14 @@ def get_feedback(answer, question):
     feedback = chain.run(prompt_text=prompt_template)
     return feedback
 
+def generate_code(question):
+    prompt_template = f"Write an optimal code solution in Python for the following problem: '{question}'. Provide the code with comments explaining each step."
+    prompt = PromptTemplate(template=prompt_template)
+    chain = LLMChain(llm=llm, prompt=prompt)
+    optimal_code = chain.run(prompt_text=prompt_template)
+    return optimal_code
+
+
 # Streamlit UI Setup
 st.set_page_config(page_title="QuestGenie 🧞")
 st.title("QuestGenie 🧞")
@@ -118,14 +126,30 @@ st.sidebar.markdown("""
     """, unsafe_allow_html=True)
 
 # Sidebar for hint button
+# Sidebar for Codeguru
 with st.sidebar:
     st.markdown('<h2 style="color: white;">Options</h2>', unsafe_allow_html=True)
+    
+    # Generate Question Option
     if st.button("💡 Show Hint"):
         if 'question' not in st.session_state:
             st.warning("Please generate a question first before requesting a hint.")
         else:
-            hint = generate_hint(st.session_state.question)
-            st.session_state.hint = hint
+            with st.spinner('Generating Hint....'):
+                hint = generate_hint(st.session_state.question)
+                st.session_state.hint = hint
+                st.success('Hint Generated !')
+    
+    # Generate Code with Codeguru Option
+    if st.button("🧑‍💻 Generate Code with Codeguru"):
+        if 'question' not in st.session_state:
+            st.warning("Please generate a question first before requesting code.")
+        else:
+            with st.spinner('Guru is preparing Guru Bachan....'):
+                optimal_code = generate_code(st.session_state.question)
+                st.session_state.optimal_code = optimal_code
+                st.success('Code Generated !')
+
 
 # Text input for topic
 topic = st.text_input("Enter the subject topic:")
@@ -141,6 +165,8 @@ if st.button("Generate Question"):
         st.session_state.hint = None  # Reset hint when a new question is generated
         st.session_state.answer = None
         st.session_state.feedback = None
+        st.session_state.optimal_code= None
+
     else:
         st.error("Please enter a subject topic.")
 
@@ -152,6 +178,9 @@ if 'question' in st.session_state:
     if 'hint' in st.session_state and st.session_state.hint:
         with st.expander("Hint"):
             st.write(st.session_state.hint)
+    if 'optimal_code' in st.session_state and st.session_state.optimal_code:
+        with st.expander('Guru Bachan'):
+            st.code(st.session_state.optimal_code, language='python')
 
 # Text area for answer
 if 'question' in st.session_state:
@@ -170,6 +199,6 @@ if 'question' in st.session_state:
 # Footer with app version and copyright
 st.markdown(f"""
     <div class="footer-text">
-        <p style="text-align: center;">QuestGenie Version 1.1.0 | &copy; 2024 sanchak147</p>
+        <p style="text-align: center;">QuestGenie Version 1.1.1 | &copy; 2024 sanchak147</p>
     </div>
 """, unsafe_allow_html=True)
