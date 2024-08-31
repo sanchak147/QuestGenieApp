@@ -256,6 +256,6 @@ else:  # CodeGuru Page
 # Footer with app version and copyright
 st.markdown(f"""
     <div class="footer-text">
-        <p style="text-align: center;">QuestGenie Version 1.1.2 | &copy; 2024 sanchak147</p>
+        <p style="text-align: center;">QuestGenie Version 1.1.3 | &copy; 2024 sanchak147</p>
     </div>
 """, unsafe_allow_html=True)
